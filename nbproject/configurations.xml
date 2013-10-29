@@ -4,8 +4,12 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>Loop.hpp</itemPath>
+      <itemPath>Input.hpp</itemPath>
+      <itemPath>Network.hpp</itemPath>
       <itemPath>Streamer.hpp</itemPath>
+      <itemPath>Threads.hpp</itemPath>
+      <itemPath>Watermark.hpp</itemPath>
+      <itemPath>structs.hpp</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -14,8 +18,11 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>Loop.cpp</itemPath>
+      <itemPath>Input.cpp</itemPath>
+      <itemPath>Network.cpp</itemPath>
       <itemPath>Streamer.cpp</itemPath>
+      <itemPath>Threads.cpp</itemPath>
+      <itemPath>Watermark.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -41,14 +48,20 @@
       </toolsSet>
       <compileType>
         <cTool>
+          <incDir>
+            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/local/include</pElem>
+          </incDir>
           <preprocessorList>
             <Elem>DEBUG</Elem>
           </preprocessorList>
           <warningLevel>2</warningLevel>
         </cTool>
         <ccTool>
+          <commandlineTool>g++</commandlineTool>
           <incDir>
-            <pElem>/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/local/include</pElem>
           </incDir>
           <preprocessorList>
             <Elem>DEBUG</Elem>
@@ -57,19 +70,47 @@
         </ccTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/home/tobias/dev/GRAPES/dist/Debug/GNU-Generic</pElem>
+            <pElem>/usr/local/lib</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/dist/Debug/GNU-Generic</pElem>
           </linkerAddLib>
+          <linkerDynSerch>
+            <pElem>.</pElem>
+          </linkerDynSerch>
+          <linkerLibItems>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>avcodec</linkerLibLibItem>
+            <linkerLibLibItem>avdevice</linkerLibLibItem>
+            <linkerLibLibItem>avfilter</linkerLibLibItem>
+            <linkerLibLibItem>avformat</linkerLibLibItem>
+            <linkerLibLibItem>avresample</linkerLibLibItem>
+            <linkerLibLibItem>avutil</linkerLibLibItem>
+            <linkerLibLibItem>GRAPES</linkerLibLibItem>
+          </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="Loop.cpp" ex="false" tool="1" flavor2="0">
+      <item path="Input.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="Loop.hpp" ex="false" tool="3" flavor2="0">
+      <item path="Input.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Network.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Network.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Streamer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Streamer.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Threads.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Threads.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Watermark.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Watermark.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="structs.hpp" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -82,11 +123,17 @@
       <compileType>
         <cTool>
           <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/local/include</pElem>
+          </incDir>
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <commandlineTool>g++</commandlineTool>
           <incDir>
-            <pElem>/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/local/include</pElem>
           </incDir>
         </ccTool>
         <fortranCompilerTool>
@@ -97,19 +144,47 @@
         </asmTool>
         <linkerTool>
           <linkerAddLib>
-            <pElem>/home/tobias/dev/GRAPES/dist/Release/GNU-Generic</pElem>
+            <pElem>/usr/local/lib</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/dist/Release/GNU-Generic</pElem>
           </linkerAddLib>
+          <linkerDynSerch>
+            <pElem>.</pElem>
+          </linkerDynSerch>
+          <linkerLibItems>
+            <linkerLibLibItem>pthread</linkerLibLibItem>
+            <linkerLibLibItem>avcodec</linkerLibLibItem>
+            <linkerLibLibItem>avdevice</linkerLibLibItem>
+            <linkerLibLibItem>avfilter</linkerLibLibItem>
+            <linkerLibLibItem>avformat</linkerLibLibItem>
+            <linkerLibLibItem>avresample</linkerLibLibItem>
+            <linkerLibLibItem>avutil</linkerLibLibItem>
+            <linkerLibLibItem>GRAPES</linkerLibLibItem>
+          </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="Loop.cpp" ex="false" tool="1" flavor2="0">
+      <item path="Input.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="Loop.hpp" ex="false" tool="3" flavor2="0">
+      <item path="Input.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Network.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Network.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Streamer.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Streamer.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Threads.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Threads.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Watermark.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Watermark.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="structs.hpp" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

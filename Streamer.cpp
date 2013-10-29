@@ -8,12 +8,28 @@
 #include <iostream>
 #include <string>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+// GRAPES
+#include <net_helper.h>
+#include <peerset.h>
+#include <topmanager.h>
+#include <chunk.h>
+#include <trade_msg_ha.h>
+#ifdef __cplusplus
+}
+#endif
+
 #include "Streamer.hpp"
 #include "Threads.hpp"
 
-#include <net_helper.h>
-
 using namespace std;
+
+InputDescription *Streamer::inputDescription = NULL;
+int Streamer::chunkBufferSize = 0;
+peerset *Streamer::peerSet = NULL;
+ChunkBuffer *Streamer::cb = NULL;
 
 Streamer::Streamer() {
     this->configFilename = "";
@@ -57,54 +73,104 @@ void Streamer::parseCommandLineArguments(int argc, char* argv[]) {
 
 bool Streamer::init() {
 #ifdef DEBUG
-    cout << "called Streamer::init" << endl;
+    fprintf(stdout, "Called Streamer::init\n");
 #endif
-    struct nodeID *myID;
-    Network n = new Network();
-    this->network = &n;
-    char *my_addr = this->network->createInterface(this->configInterface);
+    // check if a filename was entered
+    if(this->configFilename.empty()) {
+        fprintf(stderr, "No filename entered: please use -f <filename>\n");
+        cout << "No filename entered: please use -f <filename>" << endl;
+        return false;
+    }
+    
+    this->network = Network::getInstance();
+    string my_addr = this->network->createInterface(this->configInterface);
 
-    if (my_addr == NULL) {
-        fprintf(stderr, "Cannot find network interface %s\n", this->configInterface);
-
-        return NULL;
+    if (my_addr.empty()) {
+        fprintf(stderr, "Cannot find network interface %s\n", this->configInterface.c_str());
+        return false;
     }
 
-    myID = net_helper_init(my_addr, this->configPort);
-    if (myID == NULL) {
-        fprintf(stderr, "Error creating my socket (%s:%d)!\n", my_addr, this->configPort);
-        free(my_addr);
+    this->socket = net_helper_init(my_addr.c_str(), this->configPort, "");
+    if (this->socket == NULL) {
+        fprintf(stderr, "Error creating my socket (%s:%d)!\n", my_addr.c_str(), this->configPort);
+        //free(my_addr); // not needed for std::string
 
-        return NULL;
+        return false;
     }
-    free(my_addr);
-    topInit(myID);
 
-    return myID;
+    // free(my_addr); // not needed for std::string
+
+    //int resultTopInit = topInit(this->socket, &this->metadata, sizeof(this->metadata), NULL);
+    int resultTopInit = topInit(this->socket, &this->metadata, sizeof(this->metadata), "protocol=cyclon");
+    if (resultTopInit < 0) {
+        fprintf(stderr, "Error while initialization of topology manager\n");
+
+        return false;
+    }
+
+    return true;
 }
 
-void Streamer::startThreads() {
-#ifdef DEBUG
-    fprintf(stdout, "Called Streamer::loop\n");
-#endif
-    pthread_t generate_thread, receive_thread, gossiping_thread, distributing_thread;
+bool Streamer::initializeSource() {
+    Input *input = Input::getInstance();
+    this->inputDescription = input->open(this->configFilename);
+    if (this->inputDescription == NULL) {
+        return false;
+    }
 
-    period = csize;
-    chunks_per_period = chunks;
-    s = s1;
 
-    pset = peerset_init(0);
-    sigInit(s, pset); // TODO
-    source_init(fname, s); // TODO
-    pthread_mutex_init(&cb_mutex, NULL);
-    pthread_mutex_init(&topology_mutex, NULL);
-    pthread_create(&receiveDataThread, NULL, Threads::receiveData, NULL); // Thread for receiving data
-    pthread_create(&gossiping_thread, NULL, Threads::sendTopology, NULL); // Thread for sharing the 
-    pthread_create(&generate_thread, NULL, Threads::forgeChunk, NULL);
-    pthread_create(&distributing_thread, NULL, Threads::sendChunk, NULL);
+    this->initializeStream(1);
+    return true;
+}
 
-    pthread_join(generate_thread, NULL);
-    pthread_join(receive_thread, NULL);
-    pthread_join(gossiping_thread, NULL);
-    pthread_join(distributing_thread, NULL);
+bool Streamer::initializeStream(int size) {
+    char conf[32];
+
+    Streamer::chunkBufferSize = size;
+
+    sprintf(conf, "size=%d", Streamer::chunkBufferSize);
+    cb = cb_init(conf);
+    chunkDeliveryInit(this->socket);
+    
+    return true;
+}
+
+string Streamer::getConfigFilename() {
+    return configFilename;
+}
+
+void Streamer::setConfigFilename(string configFilename) {
+    this->configFilename = configFilename;
+}
+
+string Streamer::getConfigInterface() {
+    return configInterface;
+}
+
+void Streamer::setConfigInterface(string configInterface) {
+    this->configInterface = configInterface;
+}
+
+int Streamer::getConfigPort() {
+    return configPort;
+}
+
+void Streamer::setConfigPort(int configPort) {
+    this->configPort = configPort;
+}
+
+Network* Streamer::getNetwork() {
+    return network;
+}
+
+void Streamer::setNetwork(Network* network) {
+    this->network = network;
+}
+
+nodeID* Streamer::getSocket() {
+    return socket;
+}
+
+void Streamer::setSocket(nodeID* socket) {
+    this->socket = socket;
 }

@@ -11,7 +11,19 @@
 #include <iostream>
 #include <string>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+// GRAPES
+#include <chunkbuffer.h>
+#include <peerset.h>
+#ifdef __cplusplus
+}
+#endif
+
 #include "Network.hpp"
+#include "Input.hpp"
+
 
 using namespace std;
 
@@ -22,15 +34,37 @@ public:
     virtual ~Streamer();
     void parseCommandLineArguments(int argc, char* argv[]);
     bool init();
-    void startThreads();
+    bool initializeSource();
+
+    string getConfigFilename();
+    void setConfigFilename(string configFilename);
+    string getConfigInterface();
+    void setConfigInterface(string configInterface);
+    int getConfigPort();
+    void setConfigPort(int configPort);
+    Network* getNetwork();
+    void setNetwork(Network* network);
+    nodeID* getSocket();
+    void setSocket(nodeID* socket);
+    static ChunkBuffer *cb;
+
+    static InputDescription *inputDescription;
+    static int chunkBufferSize;
+    static peerset *peerSet;
 private:
+
+
+    bool initializeStream(int size);
+
     // configuration
     string configFilename;
     string configInterface;
     int configPort;
 
-    nodeID socket;
+    nodeID *socket;
     Network *network;
+    int metadata;
+
 };
 
 #endif	/* STREAMER_HPP */

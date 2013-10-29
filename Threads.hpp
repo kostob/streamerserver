@@ -13,23 +13,25 @@
 class Threads {
 public:
     Threads();
-    Threads(Network *network);
-    Threads(const Loop& orig);
+    Threads(const Threads& orig);
     virtual ~Threads();
-    static void *receiveData(void *network);
-    static void *sendTopology(void *network);
-    static void *forgeChunk(void *network);
-    static void *sendChunk(void *network);
+    void startThreads(Streamer *s);
+
+    pthread_mutex_t chunkBufferMutex;
+    pthread_mutex_t topologyMutex;
 private:
-    static bool stopThreads = false;
-    static int chunks_per_period = 1;
-    static int period = 500000;
+    static void *receiveData(void *mut);
+    static void *sendTopology(void *mut);
+    static void *generateChunks(void *mut);
+    static void *sendChunk(void *mut);
+
+    static bool stopThreads;
+    static int chunks_per_period;
+    static int gossipingPeriod;
     static int done;
-    static pthread_mutex_t cb_mutex;
-    static pthread_mutex_t topology_mutex;
-    static struct nodeID *s;
-    static struct peerset *peerSet;
+    static nodeID *s;
     Network *network;
+    Streamer *streamer;
 };
 
 #endif	/* THREADS_HPP */
