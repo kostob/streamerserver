@@ -93,7 +93,7 @@ void *Threads::receiveData(void *mut) {
         struct nodeID *remote;
         static uint8_t buffer[BUFFSIZE];
 
-        numberOfReceivedBytes = recv_from_peer(s, &remote, buffer, BUFFSIZE);
+        numberOfReceivedBytes = recv_from_peer(t->streamer->getSocket(), &remote, buffer, BUFFSIZE);
         switch (buffer[0] /* Message Type */) {
             case MSG_TYPE_TOPOLOGY:
                 pthread_mutex_lock(&t->topologyMutex);
