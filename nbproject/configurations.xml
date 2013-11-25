@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="89">
+<configurationDescriptor version="90">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -41,7 +41,6 @@
   <confs>
     <conf name="Debug" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
@@ -49,7 +48,7 @@
       <compileType>
         <cTool>
           <incDir>
-            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev2/GRAPES/include</pElem>
             <pElem>/usr/local/include</pElem>
           </incDir>
           <preprocessorList>
@@ -60,7 +59,7 @@
         <ccTool>
           <commandlineTool>g++</commandlineTool>
           <incDir>
-            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev2/GRAPES/include</pElem>
             <pElem>/usr/local/include</pElem>
           </incDir>
           <preprocessorList>
@@ -71,7 +70,7 @@
         <linkerTool>
           <linkerAddLib>
             <pElem>/usr/local/lib</pElem>
-            <pElem>/usr/home/tobias/dev/GRAPES/dist/Debug/GNU-Generic</pElem>
+            <pElem>/usr/home/tobias/dev2/GRAPES/src</pElem>
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>.</pElem>
@@ -84,7 +83,7 @@
             <linkerLibLibItem>avformat</linkerLibLibItem>
             <linkerLibLibItem>avresample</linkerLibLibItem>
             <linkerLibLibItem>avutil</linkerLibLibItem>
-            <linkerLibLibItem>GRAPES</linkerLibLibItem>
+            <linkerLibLibItem>grapes</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
@@ -115,7 +114,6 @@
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>default</compilerSet>
         <dependencyChecking>true</dependencyChecking>
         <rebuildPropChanged>false</rebuildPropChanged>
@@ -124,7 +122,7 @@
         <cTool>
           <developmentMode>5</developmentMode>
           <incDir>
-            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev2/GRAPES/include</pElem>
             <pElem>/usr/local/include</pElem>
           </incDir>
         </cTool>
@@ -132,7 +130,7 @@
           <developmentMode>5</developmentMode>
           <commandlineTool>g++</commandlineTool>
           <incDir>
-            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev2/GRAPES/include</pElem>
             <pElem>/usr/local/include</pElem>
           </incDir>
         </ccTool>
@@ -145,7 +143,7 @@
         <linkerTool>
           <linkerAddLib>
             <pElem>/usr/local/lib</pElem>
-            <pElem>/usr/home/tobias/dev/GRAPES/dist/Release/GNU-Generic</pElem>
+            <pElem>/usr/home/tobias/dev2/GRAPES/src</pElem>
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>.</pElem>
@@ -158,7 +156,7 @@
             <linkerLibLibItem>avformat</linkerLibLibItem>
             <linkerLibLibItem>avresample</linkerLibLibItem>
             <linkerLibLibItem>avutil</linkerLibLibItem>
-            <linkerLibLibItem>GRAPES</linkerLibLibItem>
+            <linkerLibLibItem>grapes</linkerLibLibItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>

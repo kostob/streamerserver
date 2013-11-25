@@ -8,13 +8,13 @@
 #include <iostream>
 #include <string>
 
+// GRAPES
 #ifdef __cplusplus
 extern "C" {
 #endif
-// GRAPES
 #include <net_helper.h>
 #include <peerset.h>
-#include <topmanager.h>
+#include <peersampler.h>
 #include <chunk.h>
 #include <trade_msg_ha.h>
 #ifdef __cplusplus
@@ -26,15 +26,19 @@ extern "C" {
 
 using namespace std;
 
-InputDescription *Streamer::inputDescription = NULL;
 int Streamer::chunkBufferSize = 0;
-peerset *Streamer::peerSet = NULL;
-ChunkBuffer *Streamer::cb = NULL;
+int Streamer::chunkBufferSizeMax = 100;
+PeerSet *Streamer::peerSet = NULL;
+ChunkBuffer *Streamer::chunkBuffer = NULL;
+ChunkIDSet *Streamer::chunkIDSet = NULL;
+PeerChunk *Streamer::peerChunks = NULL;
+int Streamer::peerChunksSize = 0;
 
 Streamer::Streamer() {
     this->configFilename = "";
     this->configInterface = "lo0";
     this->configPort = 6666;
+    this->configPeersample = "protocol=cyclon";
 }
 
 Streamer::Streamer(const Streamer& orig) {
@@ -76,12 +80,12 @@ bool Streamer::init() {
     fprintf(stdout, "Called Streamer::init\n");
 #endif
     // check if a filename was entered
-    if(this->configFilename.empty()) {
+    if (this->configFilename.empty()) {
         fprintf(stderr, "No filename entered: please use -f <filename>\n");
-        cout << "No filename entered: please use -f <filename>" << endl;
         return false;
     }
-    
+
+    // create the interface for connection
     this->network = Network::getInstance();
     string my_addr = this->network->createInterface(this->configInterface);
 
@@ -90,48 +94,55 @@ bool Streamer::init() {
         return false;
     }
 
+    // initialize net helper
     this->socket = net_helper_init(my_addr.c_str(), this->configPort, "");
     if (this->socket == NULL) {
         fprintf(stderr, "Error creating my socket (%s:%d)!\n", my_addr.c_str(), this->configPort);
-        //free(my_addr); // not needed for std::string
-
         return false;
     }
 
-    // free(my_addr); // not needed for std::string
-
-    //int resultTopInit = topInit(this->socket, &this->metadata, sizeof(this->metadata), NULL);
-    int resultTopInit = topInit(this->socket, &this->metadata, sizeof(this->metadata), "protocol=cyclon");
-    if (resultTopInit < 0) {
-        fprintf(stderr, "Error while initialization of topology manager\n");
-
+    // initialize PeerSampler
+    this->peersampleContext = psample_init(this->socket, NULL, 0, this->configPeersample.c_str());
+    if (this->peersampleContext == NULL) {
+        fprintf(stderr, "Error while initializing the peer sampler\n");
         return false;
     }
 
-    return true;
-}
-
-bool Streamer::initializeSource() {
-    Input *input = Input::getInstance();
-    this->inputDescription = input->open(this->configFilename);
-    if (this->inputDescription == NULL) {
+    // initialize ChunkBuffer
+    char config[50];
+    sprintf(config, "size=%d,time=now", Streamer::chunkBufferSizeMax);
+    Streamer::chunkBuffer = cb_init(config);
+    if (Streamer::chunkBuffer == NULL) {
+        fprintf(stderr, "Error while initializing chunk buffer\n");
         return false;
     }
 
+    // initialize chunk delivery
+    if (chunkDeliveryInit(this->socket) < 0) {
+        fprintf(stderr, "Error while initializing chunk delivery\n");
+        return false;
+    }
 
-    this->initializeStream(1);
-    return true;
-}
+    // init chunk signaling
+    if (chunkSignalingInit(this->socket) == 0) {
+        fprintf(stderr, "Error while initializing chunk signalling\n");
+        return false;
+    }
 
-bool Streamer::initializeStream(int size) {
-    char conf[32];
+    // init chunkid set
+    sprintf(config, "size=%d", Streamer::chunkBufferSizeMax);
+    Streamer::chunkIDSet = chunkID_set_init(config);
+    if (Streamer::chunkIDSet == NULL) {
+        fprintf(stderr, "Error while initializing chunkid set\n");
+        return false;
+    }
 
-    Streamer::chunkBufferSize = size;
+    // initialize source
+    Input * input = Input::getInstance();
+    if (input->open(this->configFilename) == false) {
+        return false;
+    }
 
-    sprintf(conf, "size=%d", Streamer::chunkBufferSize);
-    cb = cb_init(conf);
-    chunkDeliveryInit(this->socket);
-    
     return true;
 }
 
@@ -159,18 +170,14 @@ void Streamer::setConfigPort(int configPort) {
     this->configPort = configPort;
 }
 
-Network* Streamer::getNetwork() {
-    return network;
-}
-
-void Streamer::setNetwork(Network* network) {
-    this->network = network;
-}
-
 nodeID* Streamer::getSocket() {
     return socket;
 }
 
 void Streamer::setSocket(nodeID* socket) {
     this->socket = socket;
+}
+
+psample_context *Streamer::getPeersampleContext() {
+    return this->peersampleContext;
 }

@@ -16,11 +16,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-// FFMPEG
+    // FFMPEG
 #include <libavformat/avformat.h>
 
-// GRAPES
+    // GRAPES
 #include <chunk.h>
+#include <chunkiser.h>
 #ifdef __cplusplus
 }
 #endif
@@ -33,23 +34,22 @@ using namespace std;
 class Input { // class is a singleton
 public:
     static Input* getInstance();
-    InputDescription *open(string filename);
-    bool generateChunk(int64_t *delta);
+    bool open(string filename);
+    bool generateChunk();
+    const int *getInFDs();
+    int getPeriod();
 private:
     Input();
     Input(const Input& orig);
     virtual ~Input();
-    bool openSource(string filename, int *period);
     void closeSource();
-    long get(chunk *c);
-    uint8_t *chunkise(int id, int *size, uint64_t *ts);
 
-    AVFormatContext *stream;
-    int audioStreamIndex;
-    int videoStreamIndex;
-    int64_t lastTimestamp;
-    int framesSinceGlobalHeaders;
-    InputDescription *inputDescription;
+    input_stream *inputStream;
+    int currentChunkId;
+    const int *inFDs;
+    int period;
+    char inOptions[1024];
+    char *inOptionsPointer;
 };
 
 #endif	/* INPUT_HPP */

@@ -14,9 +14,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-// GRAPES
+    // GRAPES
 #include <chunkbuffer.h>
 #include <peerset.h>
+#include <peersampler.h>
 #ifdef __cplusplus
 }
 #endif
@@ -34,7 +35,6 @@ public:
     virtual ~Streamer();
     void parseCommandLineArguments(int argc, char* argv[]);
     bool init();
-    bool initializeSource();
 
     string getConfigFilename();
     void setConfigFilename(string configFilename);
@@ -42,29 +42,28 @@ public:
     void setConfigInterface(string configInterface);
     int getConfigPort();
     void setConfigPort(int configPort);
-    Network* getNetwork();
-    void setNetwork(Network* network);
     nodeID* getSocket();
     void setSocket(nodeID* socket);
-    static ChunkBuffer *cb;
+    psample_context *getPeersampleContext();
 
-    static InputDescription *inputDescription;
+    static ChunkBuffer *chunkBuffer;
     static int chunkBufferSize;
-    static peerset *peerSet;
+    static int chunkBufferSizeMax;
+    static PeerSet *peerSet;
+    static ChunkIDSet *chunkIDSet;
+    static PeerChunk *peerChunks;
+    static int peerChunksSize;
 private:
-
-
-    bool initializeStream(int size);
-
     // configuration
     string configFilename;
     string configInterface;
     int configPort;
+    string configPeersample;
 
     nodeID *socket;
     Network *network;
     int metadata;
-
+    psample_context *peersampleContext;
 };
 
 #endif	/* STREAMER_HPP */

@@ -19,13 +19,14 @@ public:
 
     pthread_mutex_t chunkBufferMutex;
     pthread_mutex_t topologyMutex;
+    pthread_mutex_t peerChunkMutex;
+    static bool stopThreads;
 private:
     static void *receiveData(void *mut);
     static void *sendTopology(void *mut);
-    static void *generateChunks(void *mut);
+    static void *generateChunk(void *mut);
     static void *sendChunk(void *mut);
 
-    static bool stopThreads;
     static int chunks_per_period;
     static int gossipingPeriod;
     static int done;
