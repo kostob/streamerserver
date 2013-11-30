@@ -30,18 +30,24 @@ public:
     static Network *getInstance();
     string createInterface(string interface);
     void sendChunksToPeers();
-    int initializeSignaling(nodeID *myID, PeerSet *ps);
     bool addToPeerChunk(nodeID *remote, int chunkId);
     ChunkIDSet *chunkBufferToBufferMap();
-    nodeID *getLocalID();
+    void offerChunksToPeers();
+    void messagingReceiveTopology(); // not needed
+    void messagingReceiveChunk(); // not needed
+    void signalingReceicePeerAcceptedChunks();
+    void signalingReceivePeerWantsMeToDeliverChunks();
+    void signalingReceiveAcknowledge(); // not needed
+    void signalingReceivePeerOffersChunks(); // not needed
+    void signalingReceivePeerRequestsChunks();
+    void signalingReceivePeerSendsBufferMap();
+    void signalingReceivePeerRequestsBufferMap();
 
 private:
     Network();
     Network(const Network& orig);
     virtual ~Network();
 
-    nodeID *localID;
-    PeerSet *peerSet;
     static timeval timeoutBufferMap;
 };
 

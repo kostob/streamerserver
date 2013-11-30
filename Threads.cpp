@@ -55,17 +55,14 @@ void Threads::startThreads(Streamer *s) {
     //source_loop(fname,             my_sock,           period * 1000, multiply);
     //source_loop(const char *fname, struct nodeID *s1, int csize,     int chunks)
 
-    pthread_t generateChunkThread, receiveDataThread, sendTopologyThread, sendChunkThread;
-    Network *network = Network::getInstance();
+    pthread_t generateChunkThread, receiveDataThread, sendTopologyThread, sendChunkThread, offerChunksThread;
 
     //period = csize; // size of chunks
     //chunks_per_period = chunks;
 
     mutexes mut = {this};
 
-    Streamer::peerSet = peerset_init(0); // CHECK
-    network->initializeSignaling(this->streamer->getSocket(), Streamer::peerSet); // CHECK
-    psample_parse_data(this->streamer->getPeersampleContext(), NULL, 0);
+    psample_parse_data(Streamer::peersampleContext, NULL, 0);
 
     // initialize mutexes
     pthread_mutex_init(&this->chunkBufferMutex, NULL);
@@ -77,17 +74,19 @@ void Threads::startThreads(Streamer *s) {
     pthread_create(&sendTopologyThread, NULL, Threads::sendTopology, (void *) &mut); // Thread for sharing the topology of the p2p network
     pthread_create(&generateChunkThread, NULL, Threads::generateChunk, (void *) &mut); // Thread for generating chunks
     pthread_create(&sendChunkThread, NULL, Threads::sendChunk, (void *) &mut); // Thread for sending the chunks
+    pthread_create(&offerChunksThread, NULL, Threads::offerChunks, (void *) &mut); // Thread for sending the chunks
 
     // join threads
     pthread_join(generateChunkThread, NULL);
     pthread_join(receiveDataThread, NULL);
     pthread_join(sendTopologyThread, NULL);
     pthread_join(sendChunkThread, NULL);
+    pthread_join(offerChunksThread, NULL);
 }
 
 void *Threads::receiveData(void *mut) {
 #ifdef DEBUG
-    fprintf(stdout, "Thread started::receiveData\n");
+    fprintf(stdout, "Thread started Threads::receiveData\n");
 #endif
     mutexes *m = (mutexes *) mut;
     Threads *t = m->t;
@@ -97,20 +96,40 @@ void *Threads::receiveData(void *mut) {
     while (!Threads::stopThreads) {
         int numberOfReceivedBytes;
         nodeID *remote;
+        nodeID *owner;
         static uint8_t buffer[BUFFSIZE];
 
         numberOfReceivedBytes = recv_from_peer(t->streamer->getSocket(), &remote, buffer, BUFFSIZE);
+        char remoteAddress[256];
+        node_addr(remote, remoteAddress, 256);
+
+#ifdef DEBUG
+        fprintf(stdout, "DEBUG: Received message of %d bytes from %s\n", numberOfReceivedBytes, remoteAddress);
+#endif
+
         switch (buffer[0] /* Message Type */) {
             case MSG_TYPE_TOPOLOGY:
+            {
+#ifdef DEBUG
+                fprintf(stdout, "DEBUG: Received topology message from peer %s!\n", remoteAddress);
+#endif
                 pthread_mutex_lock(&t->topologyMutex);
-                psample_parse_data(t->streamer->getPeersampleContext(), buffer, BUFFSIZE);
+                psample_parse_data(Streamer::peersampleContext, buffer, numberOfReceivedBytes);
                 pthread_mutex_unlock(&t->topologyMutex);
+
+                nodeid_free(remote);
                 break;
+            }
             case MSG_TYPE_CHUNK:
-                fprintf(stderr, "Some dumb peer pushed a chunk to me!\n");
+            {
+#ifdef DEBUG
+                fprintf(stdout, "DEBUG: Some dumb peer (%s) pushed a chunk to me!\n", remoteAddress);
+#endif
+                nodeid_free(remote);
                 break;
+            }
             case MSG_TYPE_SIGNALLING:
-                nodeID *owner;
+            {
                 int maxDeliver;
                 uint16_t transId;
                 int chunkToSend;
@@ -118,81 +137,128 @@ void *Threads::receiveData(void *mut) {
                 int result;
                 ChunkIDSet *chunkIDSetReceived;
 
+                //                char remoteAddress2[256];
+                //                node_addr(remote, remoteAddress2, 256);
+                //                fprintf(stdout, "MSG_TYPE_SIGNALING: Remote 2 is now: %s\n", remoteAddress2);
+
+#ifdef DEBUG
+                fprintf(stdout, "MSG_TYPE_SIGNALING: Calling parseSignaling\n");
+#endif
                 result = parseSignaling(buffer + 1, numberOfReceivedBytes - 1, &owner, &chunkIDSetReceived, &maxDeliver, &transId, &signalingType);
-                if (owner)
+
+                //                char remoteAddress3[256];
+                //                node_addr(remote, remoteAddress3, 256);
+                //                fprintf(stdout, "MSG_TYPE_SIGNALING: Remote 3 is now: %s\n", remoteAddress3);
+
+                //                char addrOwner[256];
+                //                node_addr(owner, addrOwner, 256);
+                //                fprintf(stdout, "MSG_TYPE_SIGNALING: OWNER is %s\n", addrOwner);
+
+                if (owner) {
                     nodeid_free(owner);
+                }
+
+                //                char remoteAddress4[256];
+                //                node_addr(remote, remoteAddress4, 256);
+                //                fprintf(stdout, "MSG_TYPE_SIGNALING: Remote 4 is now: %s\n", remoteAddress4);
 
                 switch (signalingType) {
                     case sig_accept:
+                    {
+#ifdef DEBUG
+                        fprintf(stdout, "DEBUG: 1) Message ACCEPT: peer (%s) accepted %d chunks\n", remoteAddress, chunkID_set_size(chunkIDSetReceived));
+#endif
+                        pthread_mutex_lock(&t->peerChunkMutex);
+                        int i, chunkID;
+                        for (i = 0; i < chunkID_set_size(chunkIDSetReceived); ++i) {
+                            chunkID = chunkID_set_get_chunk(chunkIDSetReceived, i);
+
+                            // add to PeerChunk
+                            network->addToPeerChunk(remote, chunkID);
+                        }
+                        pthread_mutex_unlock(&t->peerChunkMutex);
+
                         break;
+                    }
                     case sig_deliver:
+                    {
+                        fprintf(stdout, "DEBUG: 1) Message DELIVER: peer wants me to deliver %d chunks\n", chunkID_set_size(chunkIDSetReceived));
+                        pthread_mutex_lock(&t->peerChunkMutex);
+                        int i, chunkID;
+                        for (i = 0; i < chunkID_set_size(chunkIDSetReceived); ++i) {
+                            chunkID = chunkID_set_get_chunk(chunkIDSetReceived, i);
+
+                            // add to PeerChunk
+                            network->addToPeerChunk(remote, chunkID);
+                        }
+                        pthread_mutex_unlock(&t->peerChunkMutex);
                         break;
+                    }
                     case sig_ack:
                         break;
-                    case sig_offer: // Peer offers x chunks...
-                        // I AM THE SERVER - I DON'T ACCEPT CHUNKS
-                        //fprintf(stdout, "1) Message OFFER: peer offers %d chunks\n", chunkID_set_size(Streamer::chunkIDSet));
-                        //chunkToSend = chunkID_set_get_latest(Streamer::chunkIDSet);
-                        ////printChunkID_set(Streamer::chunkIDSet);
-                        //Streamer::chunkIDSetReceive = chunkID_set_init("size=1");
-                        //fprintf(stdout, "2) Acceping only latest chunk #%d\n", chunkToSend);
-                        //chunkID_set_add_chunk(Streamer::chunkIDSetReceive, chunkToSend);
-                        //acceptChunks(remote, Streamer::chunkIDSetReceive, transId++);
+                    case sig_offer: // Peer offers x chunks... I'm the server, I don't need chunks...
                         break;
                     case sig_request: // peer requests x chunks
-                        fprintf(stdout, "1) Message REQUEST: peer requests %d chunks\n", chunkID_set_size(Streamer::chunkIDSet));
+                    {
+#ifdef DEBUG
+                        fprintf(stdout, "DEBUG: 1) Message REQUEST: peer (%s) requests %d chunks\n", remoteAddress, chunkID_set_size(chunkIDSetReceived));
+#endif
                         //printChunkID_set(Streamer::chunkIDSet);
-                        chunkToSend = chunkID_set_get_earliest(Streamer::chunkIDSet);
+                        chunkToSend = chunkID_set_get_earliest(chunkIDSetReceived);
 
                         pthread_mutex_lock(&t->chunkBufferMutex);
                         pthread_mutex_lock(&t->peerChunkMutex);
-                        bool res;
-                        res = network->addToPeerChunk(remote, chunkToSend); // add peer/chunk to a list, for sending in sendChunk thread
 
-                        if (res == true) {
+                        if (network->addToPeerChunk(remote, chunkToSend) == true) { // add peer/chunk to a list, for sending in sendChunk thread
                             // we have the chunk, we could send it to the remote peer
-                            ChunkIDSet *chunkIDSetRemote = chunkID_set_init("size=1");
-                            fprintf(stdout, "2) Deliver only earliest chunk #%d\n", chunkToSend);
+                            ChunkIDSet *chunkIDSetRemote = chunkID_set_init("size=1,type=bitmap");
+#ifdef DEBUG
+                            fprintf(stdout, "DEBUG: 2) Message REQUEST: Deliver only earliest chunk #%d to %s\n", chunkToSend, remoteAddress);
+#endif
                             chunkID_set_add_chunk(chunkIDSetRemote, chunkToSend);
                             deliverChunks(remote, chunkIDSetRemote, transId++); // tell remote that this chunk could be delivered
                         } else {
                             // the requested chunk is too old, send current buffermap
+#ifdef DEBUG
+                            fprintf(stdout, "DEBUG: 2) Message REQUEST: the requested chunk is too old, send current buffermap to %s\n", remoteAddress);
+#endif
                             ChunkIDSet *chunkIDSetRemote = network->chunkBufferToBufferMap();
-                            sendBufferMap(remote, network->getLocalID(), chunkIDSetRemote, Streamer::chunkBufferSize, transId);
+                            sendBufferMap(remote, t->streamer->getSocket(), chunkIDSetRemote, chunkID_set_size(chunkIDSetRemote), transId);
                         }
                         pthread_mutex_unlock(&t->peerChunkMutex);
                         pthread_mutex_unlock(&t->chunkBufferMutex);
 
                         break;
-                    case sig_send_buffermap: // peer sent a buffer of chunks
-                        // I AM THE SERVER - I DON'T ACCEPT CHUNKS
-                        //fprintf(stdout, "1) Message SEND_BMAP: I received a buffer of %d chunks\n", chunkID_set_size(Streamer::chunkIDSet));
-                        ////printChunkID_set(Streamer::chunkIDSet);
-                        //Streamer::chunkIDSetRemote = chunkID_set_init("size=15,type=bitmap");
-                        //if (!Streamer::chunkIDSetRemote) {
-                        //    fprintf(stderr, "Unable to allocate memory for Streamer::chunkIDSetRemote\n");
-                        //    return -1;
-                        //}
-                        //fillChunkID_set(Streamer::chunkIDSetRemote, Streamer::random_bmap);
-                        //fprintf(stdout, "2) Message SEND_BMAP: I send my buffer of %d chunks\n", chunkID_set_size(Streamer::chunkIDSetRemote));
-                        ////printChunkID_set(rcset);
-                        //sendBufferMap(remote, t->streamer->getSocket(), Streamer::chunkIDSetRemote, 0, transId++);
+                    }
+                    case sig_send_buffermap: // peer sent its buffermap
+                    {
+#ifdef DEBUG
+                        fprintf(stdout, "DEBUG: 1) Message SEND_BMAP: received buffer map of %d chunks from %s\n", chunkID_set_size(chunkIDSetReceived), remoteAddress);
+#endif
                         break;
+                    }
                     case sig_request_buffermap: // peer requests my buffer map
-                        // I AM THE SERVER - I HAVE ALL CHUNKS
-                        //fprintf(stdout, "1) Message REQUEST_BMAP: Someone requeste my buffer map [%d]\n", (Streamer::chunkIDSet == NULL));
-                        //Streamer::chunkIDSetRemote = chunkID_set_init(sprintf("size=%d,type=bitmap", Streamer::chunkBufferSize));
-                        //if (!Streamer::chunkIDSetRemote) {
-                        //    fprintf(stderr, "Unable to allocate memory for Streamer::chunkIDSetReceive\n");
-                        //    return -1;
-                        //}
-                        //fillChunkID_set(Streamer::chunkIDSetRemote, random_bmap);
-                        //sendBufferMap(remote, t->streamer->getSocket(), Streamer::chunkIDSetRemote, 0, transId++);
+                    {
+#ifdef DEBUG
+                        char foo[256];
+                        node_addr(remote, foo, 256);
+                        fprintf(stdout, "DEBUG: 1) Message REQUEST_BMAP: %s requested my buffer map\n", foo);
+#endif
+                        pthread_mutex_lock(&t->chunkBufferMutex);
+                        pthread_mutex_lock(&t->topologyMutex);
+                        sendBufferMap(remote, t->streamer->getSocket(), Streamer::chunkIDSet, chunkID_set_size(Streamer::chunkIDSet), transId++);
+                        pthread_mutex_unlock(&t->topologyMutex);
+                        pthread_mutex_unlock(&t->chunkBufferMutex);
                         break;
+                    }
                 }
                 break;
+            }
             default:
-                fprintf(stderr, "Unknown Message Type %x\n", buffer[0]);
+            {
+                fprintf(stderr, "Unknown Message Type \"%x\" from %s\n", buffer[0], remoteAddress);
+                break;
+            }
         }
         nodeid_free(remote);
     }
@@ -213,13 +279,15 @@ void *Threads::sendTopology(void *mut) {
         int numberOfNeighbours;
 
         pthread_mutex_lock(&t->topologyMutex);
-        psample_parse_data(t->streamer->getPeersampleContext(), NULL, 0);
+        psample_parse_data(Streamer::peersampleContext, NULL, 0);
 #ifdef DEBUG
-        neighbours = psample_get_cache(t->streamer->getPeersampleContext(), &numberOfNeighbours);
-        printf("I have %d neighbours:\n", numberOfNeighbours);
+        neighbours = psample_get_cache(Streamer::peersampleContext, &numberOfNeighbours);
+        fprintf(stdout, "I have %d neighbours:\n", numberOfNeighbours);
         for (int i = 0; i < numberOfNeighbours; i++) {
+
+
             node_addr(neighbours[i], addr, 256);
-            printf("\t%d: %s\n", i, addr);
+            fprintf(stdout, "\t%d: %s\n", i, addr);
         }
         fflush(stdout);
 #endif
@@ -244,20 +312,6 @@ void *Threads::generateChunk(void *mut) {
         input->generateChunk();
         pthread_mutex_unlock(&t->chunkBufferMutex);
 
-        /*
-        const int *fd = input->getInFDs();
-        int my_fd[10];
-        int i = 0;
-        if (fd != NULL) {
-            while (fd[i] != -1) {
-                my_fd[i] = fd[i];
-                i++;
-            }
-            my_fd[i] = -1;
-
-            wait4data(NULL, NULL, my_fd);
-        }
-        */
         usleep((useconds_t) input->getPeriod());
     }
 
@@ -266,7 +320,7 @@ void *Threads::generateChunk(void *mut) {
 
 void *Threads::sendChunk(void *mut) {
 #ifdef DEBUG
-    fprintf(stdout, "Thread started::sendChunk\n");
+    fprintf(stdout, "Thread started Threads::sendChunk\n");
 #endif
     mutexes *m = (mutexes *) mut;
     Threads *t = m->t;
@@ -283,6 +337,29 @@ void *Threads::sendChunk(void *mut) {
         pthread_mutex_unlock(&t->chunkBufferMutex);
         pthread_mutex_unlock(&t->topologyMutex);
         usleep(chunk_period);
+    }
+
+    return NULL;
+}
+
+void *Threads::offerChunks(void* mut) {
+#ifdef DEBUG
+    fprintf(stdout, "Thread started Threads::offerChunks\n");
+#endif
+    mutexes *m = (mutexes *) mut;
+    Threads *t = m->t;
+
+    Network *network = Network::getInstance();
+
+    while (!Threads::stopThreads) {
+        pthread_mutex_lock(&t->topologyMutex);
+        pthread_mutex_lock(&t->chunkBufferMutex);
+        pthread_mutex_lock(&t->peerChunkMutex);
+        network->offerChunksToPeers();
+        pthread_mutex_unlock(&t->peerChunkMutex);
+        pthread_mutex_unlock(&t->chunkBufferMutex);
+        pthread_mutex_unlock(&t->topologyMutex);
+        usleep(5 * 1000 * 100); // 0.5 sec
     }
 
     return NULL;

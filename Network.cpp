@@ -92,17 +92,14 @@ string Network::createInterface(string interface) {
     return strdup(buff);
 }
 
-int Network::initializeSignaling(nodeID* myID, PeerSet* ps) {
-    this->localID = myID;
-    this->peerSet = ps;
-    return 1;
-}
-
 bool Network::addToPeerChunk(nodeID* remote, int chunkId) {
     // check if chunk is not too old and is still in the chunk buffer
     if (cb_get_chunk(Streamer::chunkBuffer, chunkId) != NULL) {
         Streamer::peerChunks = (PeerChunk*) realloc(Streamer::peerChunks, sizeof (PeerChunk));
-        Streamer::peerChunks[Streamer::peerChunksSize].peer = peerset_get_peer(this->peerSet, remote);
+        peer *p;
+        p = (peer*) malloc(sizeof (peer));
+        p->id = remote;
+        Streamer::peerChunks[Streamer::peerChunksSize].peer = p;
         Streamer::peerChunks[Streamer::peerChunksSize++].chunk = chunkId;
     } else {
         return false;
@@ -111,12 +108,23 @@ bool Network::addToPeerChunk(nodeID* remote, int chunkId) {
 }
 
 void Network::sendChunksToPeers() {
-    char addressRemote[256];
-    
     for (int i = 0; i < Streamer::peerChunksSize; ++i) {
-        node_addr(Streamer::peerChunks[i].peer->id, addressRemote, 256);
-        fprintf(stdout, "Sending chunk %d to peer %s", Streamer::peerChunks[i].chunk, addressRemote);
-        sendChunk(Streamer::peerChunks[i].peer->id, cb_get_chunk(Streamer::chunkBuffer, Streamer::peerChunks[i].chunk), 0);
+        const chunk *c = cb_get_chunk(Streamer::chunkBuffer, Streamer::peerChunks[i].chunk);
+        if (c != NULL) {
+#ifdef DEBUG
+            char addressRemote[256];
+            node_addr(Streamer::peerChunks[i].peer->id, addressRemote, 256);
+            fprintf(stdout, "DEBUG: Sending chunk %d to peer %s\n", Streamer::peerChunks[i].chunk, addressRemote);
+#endif
+            sendChunk(Streamer::peerChunks[i].peer->id, c, 0);
+        } else {
+#ifdef DEBUG
+            char addressRemote[256];
+            node_addr(Streamer::peerChunks[i].peer->id, addressRemote, 256);
+            fprintf(stdout, "DEBUG: Sending chunk %d to peer %s failed: chunk to old (not in chunkbuffer anymore)\n", Streamer::peerChunks[i].chunk, addressRemote);
+#endif
+
+        }
     }
 
     // reset peerChunks
@@ -124,7 +132,7 @@ void Network::sendChunksToPeers() {
     Streamer::peerChunksSize = 0;
 }
 
-chunkID_set *Network::chunkBufferToBufferMap() {
+ChunkIDSet *Network::chunkBufferToBufferMap() {
     struct chunk *chunks;
     int num_chunks, i;
     chunkID_set *my_bmap = chunkID_set_init(0);
@@ -136,6 +144,13 @@ chunkID_set *Network::chunkBufferToBufferMap() {
     return my_bmap;
 }
 
-nodeID *Network::getLocalID() {
-    return this->localID;
+void Network::offerChunksToPeers() {
+    int maximumNumberOfOffers = 10;
+    int numberOfPeers;
+    const nodeID * const* peers;
+    peers = psample_get_cache(Streamer::peersampleContext, &numberOfPeers);
+
+    for (int i = 0; i < numberOfPeers && i < maximumNumberOfOffers; ++i) {
+        offerChunks((nodeID*) peers[i], Streamer::chunkIDSet, 50, 0);
+    }
 }

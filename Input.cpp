@@ -68,10 +68,10 @@ void Input::closeSource() {
 
 bool Input::generateChunk() {
 #ifdef DEBUG
-    fprintf(stderr, "Generating Chunk %d started\n", this->currentChunkId);
+    //    fprintf(stderr, "Generating Chunk %d started\n", this->currentChunkId);
 #endif
     int res;
-    chunk *c = (chunk*) malloc(sizeof(chunk));
+    chunk *c = (chunk*) malloc(sizeof (chunk));
 
     c->id = this->currentChunkId;
     c->attributes = NULL;
@@ -93,19 +93,24 @@ bool Input::generateChunk() {
         // get new chunk buffer size
         cb_get_chunks(Streamer::chunkBuffer, &Streamer::chunkBufferSize);
 
-        // TODO: first has to be removed if > chunk buffer
-        chunkID_set_add_chunk(Streamer::chunkIDSet, c->id);
+        // create new chunkIDSet because first one could not be removed
+        Network *network = Network::getInstance();
+        chunkID_set_free(Streamer::chunkIDSet);
+        Streamer::chunkIDSet = network->chunkBufferToBufferMap();
     }
 
 #ifdef DEBUG
     int n;
     chunk *chunksInBuffer = cb_get_chunks(Streamer::chunkBuffer, &n);
-    fprintf(stderr, "Generating Chunk %d finished: %d chunks in buffer (first: %d, last %d)\n",
-            this->currentChunkId,
-            Streamer::chunkBufferSize,
-            chunksInBuffer[0].id,
-            chunksInBuffer[n - 1].id
-            );
+    if (this->currentChunkId % 10 == 0) {
+        // print only every 10 chunks
+        fprintf(stdout, "Generating Chunk %d finished: %d chunks in buffer (first: %d, last %d)\n",
+                this->currentChunkId,
+                Streamer::chunkBufferSize,
+                chunksInBuffer[0].id,
+                chunksInBuffer[n - 1].id
+                );
+    }
 #endif
 
     ++this->currentChunkId;

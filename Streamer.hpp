@@ -44,7 +44,6 @@ public:
     void setConfigPort(int configPort);
     nodeID* getSocket();
     void setSocket(nodeID* socket);
-    psample_context *getPeersampleContext();
 
     static ChunkBuffer *chunkBuffer;
     static int chunkBufferSize;
@@ -53,17 +52,19 @@ public:
     static ChunkIDSet *chunkIDSet;
     static PeerChunk *peerChunks;
     static int peerChunksSize;
+    static psample_context *peersampleContext;
 private:
     // configuration
     string configFilename;
     string configInterface;
     int configPort;
     string configPeersample;
+    string configChunkBuffer;
+    string configChunkIDSet;
 
     nodeID *socket;
     Network *network;
     int metadata;
-    psample_context *peersampleContext;
 };
 
 #endif	/* STREAMER_HPP */

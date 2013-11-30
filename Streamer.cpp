@@ -33,12 +33,15 @@ ChunkBuffer *Streamer::chunkBuffer = NULL;
 ChunkIDSet *Streamer::chunkIDSet = NULL;
 PeerChunk *Streamer::peerChunks = NULL;
 int Streamer::peerChunksSize = 0;
+psample_context *Streamer::peersampleContext = NULL;
 
 Streamer::Streamer() {
     this->configFilename = "";
     this->configInterface = "lo0";
-    this->configPort = 6666;
+    this->configPort = 55555;
     this->configPeersample = "protocol=cyclon";
+    this->configChunkBuffer = "size=100,time=now"; // size must be same value as chunkBufferSizeMax
+    this->configChunkIDSet = "size=100,type=bitmap"; // size must be same value as chunkBufferSizeMax
 }
 
 Streamer::Streamer(const Streamer& orig) {
@@ -102,18 +105,23 @@ bool Streamer::init() {
     }
 
     // initialize PeerSampler
-    this->peersampleContext = psample_init(this->socket, NULL, 0, this->configPeersample.c_str());
-    if (this->peersampleContext == NULL) {
+    Streamer::peersampleContext = psample_init(this->socket, NULL, 0, this->configPeersample.c_str());
+    if (Streamer::peersampleContext == NULL) {
         fprintf(stderr, "Error while initializing the peer sampler\n");
         return false;
     }
 
     // initialize ChunkBuffer
-    char config[50];
-    sprintf(config, "size=%d,time=now", Streamer::chunkBufferSizeMax);
-    Streamer::chunkBuffer = cb_init(config);
+    Streamer::chunkBuffer = cb_init(this->configChunkBuffer.c_str());
     if (Streamer::chunkBuffer == NULL) {
         fprintf(stderr, "Error while initializing chunk buffer\n");
+        return false;
+    }
+    
+    // initialize PeerSet
+    Streamer::peerSet = peerset_init("size=0");
+    if(Streamer::peerSet == NULL) {
+        fprintf(stderr, "Error while initializing peerset\n");
         return false;
     }
 
@@ -124,14 +132,13 @@ bool Streamer::init() {
     }
 
     // init chunk signaling
-    if (chunkSignalingInit(this->socket) == 0) {
-        fprintf(stderr, "Error while initializing chunk signalling\n");
+    if (chunkSignalingInit(this->socket) == -1) {
+        fprintf(stderr, "Error while initializing chunk signaling\n");
         return false;
     }
 
     // init chunkid set
-    sprintf(config, "size=%d", Streamer::chunkBufferSizeMax);
-    Streamer::chunkIDSet = chunkID_set_init(config);
+    Streamer::chunkIDSet = chunkID_set_init(configChunkIDSet.c_str()); // ,type=bitmap"
     if (Streamer::chunkIDSet == NULL) {
         fprintf(stderr, "Error while initializing chunkid set\n");
         return false;
@@ -176,8 +183,4 @@ nodeID* Streamer::getSocket() {
 
 void Streamer::setSocket(nodeID* socket) {
     this->socket = socket;
-}
-
-psample_context *Streamer::getPeersampleContext() {
-    return this->peersampleContext;
 }
