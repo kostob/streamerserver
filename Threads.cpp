@@ -117,7 +117,6 @@ void *Threads::receiveData(void *mut) {
                 psample_parse_data(Streamer::peersampleContext, buffer, numberOfReceivedBytes);
                 pthread_mutex_unlock(&t->topologyMutex);
 
-                nodeid_free(remote);
                 break;
             }
             case MSG_TYPE_CHUNK:
@@ -125,7 +124,6 @@ void *Threads::receiveData(void *mut) {
 #ifdef DEBUG
                 fprintf(stdout, "DEBUG: Some dumb peer (%s) pushed a chunk to me!\n", remoteAddress);
 #endif
-                nodeid_free(remote);
                 break;
             }
             case MSG_TYPE_SIGNALLING:
@@ -168,6 +166,7 @@ void *Threads::receiveData(void *mut) {
 #ifdef DEBUG
                         fprintf(stdout, "DEBUG: 1) Message ACCEPT: peer (%s) accepted %d chunks\n", remoteAddress, chunkID_set_size(chunkIDSetReceived));
 #endif
+                        pthread_mutex_lock(&t->chunkBufferMutex);
                         pthread_mutex_lock(&t->peerChunkMutex);
                         int i, chunkID;
                         for (i = 0; i < chunkID_set_size(chunkIDSetReceived); ++i) {
@@ -177,6 +176,7 @@ void *Threads::receiveData(void *mut) {
                             network->addToPeerChunk(remote, chunkID);
                         }
                         pthread_mutex_unlock(&t->peerChunkMutex);
+                        pthread_mutex_unlock(&t->chunkBufferMutex);
 
                         break;
                     }
@@ -284,8 +284,6 @@ void *Threads::sendTopology(void *mut) {
         neighbours = psample_get_cache(Streamer::peersampleContext, &numberOfNeighbours);
         fprintf(stdout, "I have %d neighbours:\n", numberOfNeighbours);
         for (int i = 0; i < numberOfNeighbours; i++) {
-
-
             node_addr(neighbours[i], addr, 256);
             fprintf(stdout, "\t%d: %s\n", i, addr);
         }

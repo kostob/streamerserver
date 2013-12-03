@@ -87,7 +87,11 @@ bool Input::generateChunk() {
     res = cb_add_chunk(Streamer::chunkBuffer, c);
     if (res < 0) {
         free(c->data);
+        c->data = NULL;
         free(c->attributes);
+        c->attributes = NULL;
+        free(c);
+        c = NULL;
         return false;
     } else {
         // get new chunk buffer size
@@ -96,6 +100,7 @@ bool Input::generateChunk() {
         // create new chunkIDSet because first one could not be removed
         Network *network = Network::getInstance();
         chunkID_set_free(Streamer::chunkIDSet);
+        Streamer::chunkIDSet = NULL;
         Streamer::chunkIDSet = network->chunkBufferToBufferMap();
     }
 

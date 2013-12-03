@@ -98,9 +98,12 @@ bool Network::addToPeerChunk(nodeID* remote, int chunkId) {
         Streamer::peerChunks = (PeerChunk*) realloc(Streamer::peerChunks, sizeof (PeerChunk));
         peer *p;
         p = (peer*) malloc(sizeof (peer));
-        p->id = remote;
+        char ip[256];
+        node_ip(remote, ip, 256);
+        p->id = create_node(ip, node_port(remote));
         Streamer::peerChunks[Streamer::peerChunksSize].peer = p;
-        Streamer::peerChunks[Streamer::peerChunksSize++].chunk = chunkId;
+        Streamer::peerChunks[Streamer::peerChunksSize].chunk = chunkId;
+        ++Streamer::peerChunksSize;
     } else {
         return false;
     }
@@ -110,25 +113,30 @@ bool Network::addToPeerChunk(nodeID* remote, int chunkId) {
 void Network::sendChunksToPeers() {
     for (int i = 0; i < Streamer::peerChunksSize; ++i) {
         const chunk *c = cb_get_chunk(Streamer::chunkBuffer, Streamer::peerChunks[i].chunk);
-        if (c != NULL) {
+
+        if (c != NULL && Streamer::peerChunks[i].peer != NULL) { // TODO: check if peer is still in psampler
 #ifdef DEBUG
             char addressRemote[256];
             node_addr(Streamer::peerChunks[i].peer->id, addressRemote, 256);
             fprintf(stdout, "DEBUG: Sending chunk %d to peer %s\n", Streamer::peerChunks[i].chunk, addressRemote);
 #endif
             sendChunk(Streamer::peerChunks[i].peer->id, c, 0);
+            free(Streamer::peerChunks[i].peer->id);
+            Streamer::peerChunks[i].peer->id = NULL;
         } else {
 #ifdef DEBUG
-            char addressRemote[256];
-            node_addr(Streamer::peerChunks[i].peer->id, addressRemote, 256);
-            fprintf(stdout, "DEBUG: Sending chunk %d to peer %s failed: chunk to old (not in chunkbuffer anymore)\n", Streamer::peerChunks[i].chunk, addressRemote);
+            //char addressRemote[256];
+            //node_addr(Streamer::peerChunks[i].peer->id, addressRemote, 256);
+            fprintf(stdout, "DEBUG: Sending chunk %d failed: chunk to old (not in chunkbuffer anymore)\n", Streamer::peerChunks[i].chunk);
 #endif
-
         }
+        free(Streamer::peerChunks[i].peer);
+        Streamer::peerChunks[i].peer = NULL;
     }
 
     // reset peerChunks
     free(Streamer::peerChunks);
+    Streamer::peerChunks = NULL;
     Streamer::peerChunksSize = 0;
 }
 
