@@ -8,6 +8,8 @@
 #ifndef THREADS_HPP
 #define	THREADS_HPP
 
+#include "InputInterface.hpp"
+
 #define BUFFSIZE 64 * 1024
 
 class Threads {
@@ -34,6 +36,7 @@ private:
     static nodeID *s;
     Network *network;
     Streamer *streamer;
+    InputInterface *input;
 };
 
 #endif	/* THREADS_HPP */

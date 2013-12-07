@@ -23,7 +23,8 @@ extern "C" {
 #endif
 
 #include "Network.hpp"
-#include "Input.hpp"
+#include "InputInterface.hpp"
+#include "InputFfmpeg.hpp"
 
 
 using namespace std;
@@ -44,6 +45,7 @@ public:
     void setConfigPort(int configPort);
     nodeID* getSocket();
     void setSocket(nodeID* socket);
+    InputInterface *getInput();
 
     static ChunkBuffer *chunkBuffer;
     static int chunkBufferSize;
@@ -61,9 +63,13 @@ private:
     string configPeersample;
     string configChunkBuffer;
     string configChunkIDSet;
+    string configInputType;
 
     nodeID *socket;
     Network *network;
+    InputInterface *input;
+    
+    // not needed anymore
     int metadata;
 };
 

@@ -4,7 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>Input.hpp</itemPath>
+      <itemPath>InputFactory.hpp</itemPath>
+      <itemPath>InputFfmpeg.hpp</itemPath>
+      <itemPath>InputInterface.hpp</itemPath>
       <itemPath>Network.hpp</itemPath>
       <itemPath>Streamer.hpp</itemPath>
       <itemPath>Threads.hpp</itemPath>
@@ -18,7 +20,8 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>Input.cpp</itemPath>
+      <itemPath>InputFactory.cpp</itemPath>
+      <itemPath>InputFfmpeg.cpp</itemPath>
       <itemPath>Network.cpp</itemPath>
       <itemPath>Streamer.cpp</itemPath>
       <itemPath>Threads.cpp</itemPath>
@@ -87,9 +90,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="Input.cpp" ex="false" tool="1" flavor2="0">
+      <item path="InputFactory.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="Input.hpp" ex="false" tool="3" flavor2="0">
+      <item path="InputFactory.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="InputFfmpeg.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InputFfmpeg.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="InputInterface.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Network.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -160,9 +169,15 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="Input.cpp" ex="false" tool="1" flavor2="0">
+      <item path="InputFactory.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="Input.hpp" ex="false" tool="3" flavor2="0">
+      <item path="InputFactory.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="InputFfmpeg.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="InputFfmpeg.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="InputInterface.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Network.cpp" ex="false" tool="1" flavor2="0">
       </item>

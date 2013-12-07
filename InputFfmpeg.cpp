@@ -1,5 +1,5 @@
 /*
- * File:   Input.cpp
+ * File:   InputFfmpeg.cpp
  * Author: tobias
  *
  * Created on 21. Oktober 2013, 12:06
@@ -24,27 +24,22 @@ extern "C" {
 #endif
 
 #include "structs.hpp"
-#include "Input.hpp"
+#include "InputFfmpeg.hpp"
 #include "Threads.hpp"
 
 
 using namespace std;
 
-Input* Input::getInstance() {
-    static Input i;
-    return &i;
+InputFfmpeg::InputFfmpeg() {
 }
 
-Input::Input() {
+InputFfmpeg::InputFfmpeg(const InputFfmpeg& orig) {
 }
 
-Input::Input(const Input& orig) {
+InputFfmpeg::~InputFfmpeg() {
 }
 
-Input::~Input() {
-}
-
-bool Input::open(string filename) {
+bool InputFfmpeg::open(string filename) {
     //this->inputStream = input_stream_open(filename.c_str(), &this->period, this->inOptions);
     this->inputStream = input_stream_open(filename.c_str(), &this->period, "chunkiser=avf,media=av");
     if (this->inputStream == NULL) {
@@ -62,11 +57,11 @@ bool Input::open(string filename) {
     return true;
 }
 
-void Input::closeSource() {
+void InputFfmpeg::close() {
     input_stream_close(this->inputStream);
 }
 
-bool Input::generateChunk() {
+bool InputFfmpeg::generateChunk() {
 #ifdef DEBUG
     //    fprintf(stderr, "Generating Chunk %d started\n", this->currentChunkId);
 #endif
@@ -123,10 +118,28 @@ bool Input::generateChunk() {
     return true;
 }
 
-const int *Input::getInFDs() {
+const int *InputFfmpeg::getInFDs() {
     return this->inFDs;
 }
 
-int Input::getPeriod() {
-    return this->period;
+useconds_t InputFfmpeg::getPauseBetweenChunks() {
+    return (useconds_t) this->period;
+}
+
+uint8_t InputFfmpeg::getEncryptionDataChunk(nodeID *remote, int chunkId) {
+    // nothing to do here, nothing to crypt
+    return NULL;
+}
+
+uint8_t InputFfmpeg::getEncryptionDataLogin(nodeID *remote) {
+    // nothing to do here, nothing to crypt
+    return NULL;
+}
+
+bool InputFfmpeg::secureDataEnabledChunk() {
+    return false;
+}
+
+bool InputFfmpeg::secureDataEnabledLogin() {
+    return false;
 }

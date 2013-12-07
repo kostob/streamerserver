@@ -59,7 +59,7 @@ Network::~Network() {
 
 string Network::createInterface(string interface) {
 #ifdef DEBUG
-    fprintf(stdout, "Called Streamer::createInterface with parameter interface=%s\n", interface.c_str());
+    //fprintf(stdout, "Called Streamer::createInterface with parameter interface=%s\n", interface.c_str());
 #endif
 
     int socketHandle;

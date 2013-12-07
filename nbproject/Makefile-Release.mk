@@ -35,7 +35,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/Input.o \
+	${OBJECTDIR}/InputFactory.o \
+	${OBJECTDIR}/InputFfmpeg.o \
 	${OBJECTDIR}/Network.o \
 	${OBJECTDIR}/Streamer.o \
 	${OBJECTDIR}/Threads.o \
@@ -67,10 +68,15 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/streamerserver: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/streamerserver ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/Input.o: Input.cpp 
+${OBJECTDIR}/InputFactory.o: InputFactory.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Input.o Input.cpp
+	$(COMPILE.cc) -O2 -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InputFactory.o InputFactory.cpp
+
+${OBJECTDIR}/InputFfmpeg.o: InputFfmpeg.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InputFfmpeg.o InputFfmpeg.cpp
 
 ${OBJECTDIR}/Network.o: Network.cpp 
 	${MKDIR} -p ${OBJECTDIR}

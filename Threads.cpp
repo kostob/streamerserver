@@ -22,7 +22,7 @@ extern "C" {
 #endif
 
 #include "Network.hpp"
-#include "Input.hpp"
+#include "InputFfmpeg.hpp"
 #include "Streamer.hpp"
 #include "Threads.hpp"
 
@@ -303,14 +303,12 @@ void *Threads::generateChunk(void *mut) {
     mutexes *m = (mutexes *) mut;
     Threads *t = m->t;
 
-    Input *input = Input::getInstance();
-
     while (!Threads::stopThreads) {
         pthread_mutex_lock(&t->chunkBufferMutex);
-        input->generateChunk();
+        t->streamer->getInput()->generateChunk();
         pthread_mutex_unlock(&t->chunkBufferMutex);
 
-        usleep((useconds_t) input->getPeriod());
+        usleep(t->streamer->getInput()->getPauseBetweenChunks());
     }
 
     return NULL;

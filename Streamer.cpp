@@ -23,6 +23,7 @@ extern "C" {
 
 #include "Streamer.hpp"
 #include "Threads.hpp"
+#include "InputFactory.hpp"
 
 using namespace std;
 
@@ -42,6 +43,7 @@ Streamer::Streamer() {
     this->configPeersample = "protocol=cyclon";
     this->configChunkBuffer = "size=100,time=now"; // size must be same value as chunkBufferSizeMax
     this->configChunkIDSet = "size=100,type=bitmap"; // size must be same value as chunkBufferSizeMax
+    this->configInputType = "ffmpeg";
 }
 
 Streamer::Streamer(const Streamer& orig) {
@@ -52,7 +54,7 @@ Streamer::~Streamer() {
 
 void Streamer::parseCommandLineArguments(int argc, char* argv[]) {
 #ifdef DEBUG
-    cout << "called Streamer::parseCommandLineArguments" << endl;
+    //cout << "called Streamer::parseCommandLineArguments" << endl;
 #endif
     string arg;
     for (int i = 1; i < argc; ++i) {
@@ -74,13 +76,18 @@ void Streamer::parseCommandLineArguments(int argc, char* argv[]) {
             this->configPort = atoi(argv[i + 1]);
         }
 
+        // input type
+        if (arg.compare("-t") == 0) {
+            this->configInputType = argv[i + 1];
+        }
+
         ++i;
     }
 }
 
 bool Streamer::init() {
 #ifdef DEBUG
-    fprintf(stdout, "Called Streamer::init\n");
+    //fprintf(stdout, "Called Streamer::init\n");
 #endif
     // check if a filename was entered
     if (this->configFilename.empty()) {
@@ -117,10 +124,10 @@ bool Streamer::init() {
         fprintf(stderr, "Error while initializing chunk buffer\n");
         return false;
     }
-    
+
     // initialize PeerSet
     Streamer::peerSet = peerset_init("size=0");
-    if(Streamer::peerSet == NULL) {
+    if (Streamer::peerSet == NULL) {
         fprintf(stderr, "Error while initializing peerset\n");
         return false;
     }
@@ -144,9 +151,13 @@ bool Streamer::init() {
         return false;
     }
 
-    // initialize source
-    Input * input = Input::getInstance();
-    if (input->open(this->configFilename) == false) {
+    // init source
+    this->input = InputFactory::createInput(configInputType);
+    if (this->input != NULL) {
+        if (input->open(this->configFilename) == false) {
+            return false;
+        }
+    } else {
         return false;
     }
 
@@ -177,10 +188,14 @@ void Streamer::setConfigPort(int configPort) {
     this->configPort = configPort;
 }
 
-nodeID* Streamer::getSocket() {
+nodeID * Streamer::getSocket() {
     return socket;
 }
 
-void Streamer::setSocket(nodeID* socket) {
+void Streamer::setSocket(nodeID * socket) {
     this->socket = socket;
+}
+
+InputInterface * Streamer::getInput() {
+    return this->input;
 }

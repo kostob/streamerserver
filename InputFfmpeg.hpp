@@ -1,5 +1,5 @@
 /*
- * File:   Input.hpp
+ * File:   InputFfmpeg.hpp
  * Author: tobias
  *
  * Created on 21. Oktober 2013, 12:06
@@ -16,6 +16,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
     // FFMPEG
 #include <libavformat/avformat.h>
 
@@ -28,22 +29,31 @@ extern "C" {
 
 #include "structs.hpp"
 #include "Streamer.hpp"
+#include "InputFactory.hpp"
+#include "InputInterface.hpp"
+
 
 using namespace std;
 
-class Input { // class is a singleton
+class InputFfmpeg : public InputInterface {
 public:
-    static Input* getInstance();
+    InputFfmpeg();
+    InputFfmpeg(const InputFfmpeg& orig);
+    virtual ~InputFfmpeg();
+
+    // methods from interface
     bool open(string filename);
     bool generateChunk();
-    const int *getInFDs();
-    int getPeriod();
-private:
-    Input();
-    Input(const Input& orig);
-    virtual ~Input();
-    void closeSource();
+    void close();
+    uint8_t getEncryptionDataChunk(nodeID *remote, int chunkId);
+    uint8_t getEncryptionDataLogin(nodeID *remote);
+    bool secureDataEnabledChunk();
+    bool secureDataEnabledLogin();
+    useconds_t getPauseBetweenChunks();
 
+    const int *getInFDs();
+
+private:
     input_stream *inputStream;
     int currentChunkId;
     const int *inFDs;
