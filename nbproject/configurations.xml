@@ -51,7 +51,7 @@
       <compileType>
         <cTool>
           <incDir>
-            <pElem>/usr/home/tobias/dev2/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
             <pElem>/usr/local/include</pElem>
           </incDir>
           <preprocessorList>
@@ -62,7 +62,7 @@
         <ccTool>
           <commandlineTool>g++</commandlineTool>
           <incDir>
-            <pElem>/usr/home/tobias/dev2/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
             <pElem>/usr/local/include</pElem>
           </incDir>
           <preprocessorList>
@@ -73,7 +73,7 @@
         <linkerTool>
           <linkerAddLib>
             <pElem>/usr/local/lib</pElem>
-            <pElem>/usr/home/tobias/dev2/GRAPES/src</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/src</pElem>
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>.</pElem>
@@ -131,7 +131,7 @@
         <cTool>
           <developmentMode>5</developmentMode>
           <incDir>
-            <pElem>/usr/home/tobias/dev2/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
             <pElem>/usr/local/include</pElem>
           </incDir>
         </cTool>
@@ -139,7 +139,7 @@
           <developmentMode>5</developmentMode>
           <commandlineTool>g++</commandlineTool>
           <incDir>
-            <pElem>/usr/home/tobias/dev2/GRAPES/include</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/include</pElem>
             <pElem>/usr/local/include</pElem>
           </incDir>
         </ccTool>
@@ -152,7 +152,7 @@
         <linkerTool>
           <linkerAddLib>
             <pElem>/usr/local/lib</pElem>
-            <pElem>/usr/home/tobias/dev2/GRAPES/src</pElem>
+            <pElem>/usr/home/tobias/dev/GRAPES/src</pElem>
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>.</pElem>

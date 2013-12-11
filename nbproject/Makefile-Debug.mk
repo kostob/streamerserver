@@ -58,7 +58,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L/usr/local/lib -L/usr/home/tobias/dev2/GRAPES/src -Wl,-rpath,. -lpthread -lavcodec -lavdevice -lavfilter -lavformat -lavresample -lavutil -lgrapes
+LDLIBSOPTIONS=-L/usr/local/lib -L/usr/home/tobias/dev/GRAPES/src -Wl,-rpath,. -lpthread -lavcodec -lavdevice -lavfilter -lavformat -lavresample -lavutil -lgrapes
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -71,37 +71,37 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/streamerserver: ${OBJECTFILES}
 ${OBJECTDIR}/InputFactory.o: InputFactory.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InputFactory.o InputFactory.cpp
+	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InputFactory.o InputFactory.cpp
 
 ${OBJECTDIR}/InputFfmpeg.o: InputFfmpeg.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InputFfmpeg.o InputFfmpeg.cpp
+	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/InputFfmpeg.o InputFfmpeg.cpp
 
 ${OBJECTDIR}/Network.o: Network.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Network.o Network.cpp
+	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Network.o Network.cpp
 
 ${OBJECTDIR}/Streamer.o: Streamer.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Streamer.o Streamer.cpp
+	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Streamer.o Streamer.cpp
 
 ${OBJECTDIR}/Threads.o: Threads.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Threads.o Threads.cpp
+	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Threads.o Threads.cpp
 
 ${OBJECTDIR}/Watermark.o: Watermark.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Watermark.o Watermark.cpp
+	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Watermark.o Watermark.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev2/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -Wall -DDEBUG -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.cpp
 
 # Subprojects
 .build-subprojects:
