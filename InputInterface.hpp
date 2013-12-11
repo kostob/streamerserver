@@ -28,10 +28,10 @@ public:
     virtual bool open(string filename) = 0;
     virtual void close() = 0;
     virtual bool generateChunk() = 0;
-    virtual uint8_t getEncryptionDataChunk(nodeID *remote, int chunkId) = 0;
-    virtual uint8_t getEncryptionDataLogin(nodeID *remote) = 0;
-    virtual bool secureDataEnabledChunk() = 0;
-    virtual bool secureDataEnabledLogin() = 0;
+    virtual uint8_t *getSecuredDataChunk(nodeID *remote, int chunkId) = 0;
+    virtual uint8_t *getSecuredDataLogin(nodeID *remote) = 0;
+    virtual bool securedDataEnabledChunk() = 0;
+    virtual bool securedDataEnabledLogin() = 0;
     virtual useconds_t getPauseBetweenChunks() = 0;
 };
 

@@ -8,7 +8,7 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
-using namespace std;
+#include <netinet/in.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,7 +16,7 @@ extern "C" {
     // GRAPES
 #include <grapes_msg_types.h>
 #include <net_helper.h>
-#include <netinet/in.h>
+#include <trade_msg_ha.h>
 #ifdef __cplusplus
 }
 #endif
@@ -25,6 +25,8 @@ extern "C" {
 #include "InputFfmpeg.hpp"
 #include "Streamer.hpp"
 #include "Threads.hpp"
+
+using namespace std;
 
 bool Threads::stopThreads = false;
 int Threads::chunks_per_period = 1;
@@ -249,6 +251,43 @@ void *Threads::receiveData(void *mut) {
                         sendBufferMap(remote, t->streamer->getSocket(), Streamer::chunkIDSet, chunkID_set_size(Streamer::chunkIDSet), transId++);
                         pthread_mutex_unlock(&t->topologyMutex);
                         pthread_mutex_unlock(&t->chunkBufferMutex);
+                        break;
+                    }
+                    case sig_request_secured_data_chunk:
+                    {
+#ifdef DEBUG
+                        char remoteAddress[256];
+                        node_addr(remote, remoteAddress, 256);
+                        fprintf(stdout, "DEBUG: 1) Message REQUEST_SECURED_DATA: %s requested secure data\n", remoteAddress);
+#endif
+                        pthread_mutex_lock(&t->chunkBufferMutex);
+                        if (t->streamer->getInput()->securedDataEnabledChunk()) {
+                            chunk *c;
+                            c = (chunk*) malloc(sizeof(chunk));
+
+                            for (int i = 0; i < chunkID_set_size(chunkIDSetReceived); ++i) {
+                                c->id = chunkID_set_get_chunk(chunkIDSetReceived, i);
+                                c->data = t->streamer->getInput()->getSecuredDataChunk(remote, chunkID_set_get_chunk(chunkIDSetReceived, i));
+                                sendSecuredChunk(remote, c, transId++);
+                            }
+                        }
+                        pthread_mutex_unlock(&t->chunkBufferMutex);
+
+                        break;
+                    }
+                    case sig_request_secured_data_login:
+                    {
+#ifdef DEBUG
+                        char remoteAddress[256];
+                        node_addr(remote, remoteAddress, 256);
+                        fprintf(stdout, "DEBUG: 1) Message REQUEST_SECURED_DATA_LOGIN: %s requested secure data for login\n", remoteAddress);
+#endif
+                        if (t->streamer->getInput()->securedDataEnabledLogin()) {
+                            chunk *c;
+                            c = (chunk*) malloc(sizeof(chunk));
+                            c->data = t->streamer->getInput()->getSecuredDataLogin(remote);
+                            sendSecuredChunkLogin(remote, c, transId++);
+                        }
                         break;
                     }
                 }

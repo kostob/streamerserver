@@ -126,20 +126,20 @@ useconds_t InputFfmpeg::getPauseBetweenChunks() {
     return (useconds_t) this->period;
 }
 
-uint8_t InputFfmpeg::getEncryptionDataChunk(nodeID *remote, int chunkId) {
+uint8_t *InputFfmpeg::getSecuredDataChunk(nodeID *remote, int chunkId) {
     // nothing to do here, nothing to crypt
     return NULL;
 }
 
-uint8_t InputFfmpeg::getEncryptionDataLogin(nodeID *remote) {
+uint8_t *InputFfmpeg::getSecuredDataLogin(nodeID *remote) {
     // nothing to do here, nothing to crypt
     return NULL;
 }
 
-bool InputFfmpeg::secureDataEnabledChunk() {
+bool InputFfmpeg::securedDataEnabledChunk() {
     return false;
 }
 
-bool InputFfmpeg::secureDataEnabledLogin() {
+bool InputFfmpeg::securedDataEnabledLogin() {
     return false;
 }

@@ -29,6 +29,7 @@ private:
     static void *generateChunk(void *mut);
     static void *sendChunk(void *mut);
     static void *offerChunks(void *mut);
+    static void *receivedSecureDataRequest(void *mut);
 
     static int chunks_per_period;
     static int gossipingPeriod;

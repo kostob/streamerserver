@@ -45,10 +45,10 @@ public:
     bool open(string filename);
     bool generateChunk();
     void close();
-    uint8_t getEncryptionDataChunk(nodeID *remote, int chunkId);
-    uint8_t getEncryptionDataLogin(nodeID *remote);
-    bool secureDataEnabledChunk();
-    bool secureDataEnabledLogin();
+    uint8_t *getSecuredDataChunk(nodeID *remote, int chunkId);
+    uint8_t *getSecuredDataLogin(nodeID *remote);
+    bool securedDataEnabledChunk();
+    bool securedDataEnabledLogin();
     useconds_t getPauseBetweenChunks();
 
     const int *getInFDs();
