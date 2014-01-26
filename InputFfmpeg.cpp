@@ -3,6 +3,8 @@
  * Author: tobias
  *
  * Created on 21. Oktober 2013, 12:06
+ * 
+ * originally from peerstreamer (Streamers/input-grapes.c)
  */
 
 #include <iostream>
@@ -23,7 +25,6 @@ extern "C" {
 }
 #endif
 
-#include "structs.hpp"
 #include "InputFfmpeg.hpp"
 #include "Threads.hpp"
 

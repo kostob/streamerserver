@@ -27,7 +27,6 @@ extern "C" {
 }
 #endif
 
-#include "structs.hpp"
 #include "Streamer.hpp"
 #include "InputFactory.hpp"
 #include "InputInterface.hpp"

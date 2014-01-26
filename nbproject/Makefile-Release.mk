@@ -40,7 +40,6 @@ OBJECTFILES= \
 	${OBJECTDIR}/Network.o \
 	${OBJECTDIR}/Streamer.o \
 	${OBJECTDIR}/Threads.o \
-	${OBJECTDIR}/Watermark.o \
 	${OBJECTDIR}/main.o
 
 
@@ -92,11 +91,6 @@ ${OBJECTDIR}/Threads.o: Threads.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Threads.o Threads.cpp
-
-${OBJECTDIR}/Watermark.o: Watermark.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -I/usr/home/tobias/dev/GRAPES/include -I/usr/local/include -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Watermark.o Watermark.cpp
 
 ${OBJECTDIR}/main.o: main.cpp 
 	${MKDIR} -p ${OBJECTDIR}

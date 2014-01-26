@@ -10,8 +10,6 @@
       <itemPath>Network.hpp</itemPath>
       <itemPath>Streamer.hpp</itemPath>
       <itemPath>Threads.hpp</itemPath>
-      <itemPath>Watermark.hpp</itemPath>
-      <itemPath>structs.hpp</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -25,7 +23,6 @@
       <itemPath>Network.cpp</itemPath>
       <itemPath>Streamer.cpp</itemPath>
       <itemPath>Threads.cpp</itemPath>
-      <itemPath>Watermark.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -112,13 +109,7 @@
       </item>
       <item path="Threads.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="Watermark.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Watermark.hpp" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="structs.hpp" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -191,13 +182,7 @@
       </item>
       <item path="Threads.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="Watermark.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="Watermark.hpp" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="structs.hpp" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

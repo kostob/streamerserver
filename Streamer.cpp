@@ -52,6 +52,12 @@ Streamer::Streamer(const Streamer& orig) {
 Streamer::~Streamer() {
 }
 
+/**
+ * Parse command line
+ * 
+ * @param argc
+ * @param argv
+ */
 void Streamer::parseCommandLineArguments(int argc, char* argv[]) {
 #ifdef DEBUG
     //cout << "called Streamer::parseCommandLineArguments" << endl;
@@ -85,6 +91,13 @@ void Streamer::parseCommandLineArguments(int argc, char* argv[]) {
     }
 }
 
+/**
+ * Initialize the streamer
+ * 
+ * returns true on success, false on failure
+ * 
+ * @return bool
+ */
 bool Streamer::init() {
 #ifdef DEBUG
     //fprintf(stdout, "Called Streamer::init\n");
@@ -125,7 +138,7 @@ bool Streamer::init() {
         return false;
     }
 
-    // initialize PeerSet
+    // initialize PeerSet ==> NOT NEEDED ANYMORE
     Streamer::peerSet = peerset_init("size=0");
     if (Streamer::peerSet == NULL) {
         fprintf(stderr, "Error while initializing peerset\n");

@@ -35,13 +35,13 @@ public:
     void offerChunksToPeers();
     void messagingReceiveTopology(); // not needed
     void messagingReceiveChunk(); // not needed
-    void signalingReceicePeerAcceptedChunks();
+    void signalingReceicePeerAcceptedChunks(); // TODO: move code from Threads.cpp to this method
     void signalingReceivePeerWantsMeToDeliverChunks();
     void signalingReceiveAcknowledge(); // not needed
     void signalingReceivePeerOffersChunks(); // not needed
-    void signalingReceivePeerRequestsChunks();
-    void signalingReceivePeerSendsBufferMap();
-    void signalingReceivePeerRequestsBufferMap();
+    void signalingReceivePeerRequestsChunks(); // TODO: move code from Threads.cpp to this method
+    void signalingReceivePeerSendsBufferMap(); // TODO: move code from Threads.cpp to this method
+    void signalingReceivePeerRequestsBufferMap(); // TODO: move code from Threads.cpp to this method
 
 private:
     Network();

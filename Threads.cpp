@@ -137,30 +137,14 @@ void *Threads::receiveData(void *mut) {
                 int result;
                 ChunkIDSet *chunkIDSetReceived;
 
-                //                char remoteAddress2[256];
-                //                node_addr(remote, remoteAddress2, 256);
-                //                fprintf(stdout, "MSG_TYPE_SIGNALING: Remote 2 is now: %s\n", remoteAddress2);
-
 #ifdef DEBUG
                 fprintf(stdout, "MSG_TYPE_SIGNALING: Calling parseSignaling\n");
 #endif
                 result = parseSignaling(buffer + 1, numberOfReceivedBytes - 1, &owner, &chunkIDSetReceived, &maxDeliver, &transId, &signalingType);
 
-                //                char remoteAddress3[256];
-                //                node_addr(remote, remoteAddress3, 256);
-                //                fprintf(stdout, "MSG_TYPE_SIGNALING: Remote 3 is now: %s\n", remoteAddress3);
-
-                //                char addrOwner[256];
-                //                node_addr(owner, addrOwner, 256);
-                //                fprintf(stdout, "MSG_TYPE_SIGNALING: OWNER is %s\n", addrOwner);
-
                 if (owner) {
                     nodeid_free(owner);
                 }
-
-                //                char remoteAddress4[256];
-                //                node_addr(remote, remoteAddress4, 256);
-                //                fprintf(stdout, "MSG_TYPE_SIGNALING: Remote 4 is now: %s\n", remoteAddress4);
 
                 switch (signalingType) {
                     case sig_accept:
